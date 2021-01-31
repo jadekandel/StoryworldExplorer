@@ -1,0 +1,337 @@
+<!-- Code from d3-graph-gallery.com -->
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+
+<!-- Buttons so user can choose traits for x and y axis -->
+<form>
+    <fieldset id="x-axis">
+        <p>Select an x- axis:</p>
+
+        <div>
+          <input type="radio" id="numberOfFriends" name="x-axis" value="numberOfFriends">
+          <label for="numberOfFriends">number of friends</label>
+        </div>
+        
+        <div>
+          <input type="radio" id="numberOfEnemies" name="x-axis" value="numberOfEnemies">
+          <label for="numberOfEnemies">number of enemies</label>
+        </div>
+        
+        <div>
+          <input type="radio" id="extroversionx" name="x-axis" value="extroversion">
+          <label for="extroversion">extroversion</label>
+        </div>
+
+        <div>
+          <input type="radio" id="neuroticismx" name="x-axis" value="neuroticism">
+          <label for="neuroticism">neuroticism</label>
+        </div>
+
+        <div>
+          <input type="radio" id="opennessx" name="x-axis" value="openness" checked>
+          <label for="openness">openness</label>
+        </div>
+
+        <div>
+          <input type="radio" id="conscientiousnessx" name="x-axis" value="conscientiousness">
+          <label for="conscientiousness">conscientiousness</label>
+        </div>
+
+        <div>
+          <input type="radio" id="agreeablenessx" name="x-axis" value="agreeableness">
+          <label for="agreeableness">agreeableness</label>
+        </div>
+    </fieldset>    
+
+    <fieldset id="y-axis">
+        <p>Select an y- axis:</p>
+        
+        <div>
+          <input type="radio" id="numberOfFriends" name="y-axis" value="numberOfFriends">
+          <label for="numberOfFriends">number of friends</label>
+        </div>
+        
+        <div>
+          <input type="radio" id="numberOfEnemies" name="y-axis" value="numberOfEnemies">
+          <label for="numberOfEnemies">number of enemies</label>
+        </div>
+
+        <div>
+          <input type="radio" id="extroversiony" name="y-axis" value="extroversion"
+                 checked>
+          <label for="extroversion">extroversion</label>
+        </div>
+
+        <div>
+          <input type="radio" id="introversiony" name="y-axis" value="neuroticism">
+          <label for="neuroticism">neuroticism</label>
+        </div>
+
+        <div>
+          <input type="radio" id="opennessy" name="y-axis" value="openness">
+          <label for="openness">openness</label>
+        </div>
+        <div>
+        <input type="radio" id="conscientiousnessy" name="y-axis" value="conscientiousness">
+        <label for="conscientiousness">conscientiousness</label>
+            </div>
+
+        <div>
+        <input type="radio" id="agreeablenessy" name="y-axis" value="agreeableness">
+        <label for="agreeableness">agreeableness</label>
+        </div>
+    </fieldset>
+    <div>
+    <button type="submit">Submit</button>
+    </div>
+</form>
+
+<!-- Text that appears when hovering over a character-->
+<div class = "info" style="visibility: hidden;" >
+    <h3 class = "name" style="text-align: center"   > Name</h3>
+    <p style="text-align: center">number of friends: <strong class="numberOfFriends"> number of friends </strong> </p>
+    <p style="text-align: center">number of enemies: <strong class="numberOfEnemies"> number of friends </strong>  </p>
+    <p style="text-align: center">extroversion:<strong class="extroversion"> extroversion </strong> </p>    
+    <p style="text-align: center">neuroticism: <strong class="neuroticism"> neuroticism </strong> </p>    
+    <p style="text-align: center">openness: <strong class="openness"> openness </strong> </p>   
+    <p style="text-align: center">conscientiousness: <strong class="conscientiousness"> conscientiousness </strong></p>   
+    <p style="text-align: center">agreeableness: <strong class="agreeableness"> agreeableness </strong> </p>    
+</div>
+
+
+
+<!-- Create a div where the graph will take place -->
+
+<div id="my_dataviz"></div>
+
+
+
+
+<script>
+
+
+
+    var xtrait = "openness";
+    var ytrait = "extroversion";
+   
+    // set the dimensions and margins of the graph
+    var margin = {top: 60, right: 60, bottom: 60, left: 60},
+        width = 800 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+//Read the data
+    d3.json("town-1611681595.json", function(data) {
+            
+        //assigns color to data point, creates gradient from blue to red where blue is min and red is max
+        function getColor (xtrait, max, x){
+            if (xtrait=="numberOfFriends" || xtrait=="numberOfEnemies"){
+                let i = x/max
+                return "rgb(" + Math.floor (i*255) + ",0," +  Math.floor ((1-i)*255)+ ")" 
+                console.log("rgb(" + (1-i)*255 + ",0," + i*255 + ")")
+            }else{
+                let i = (1+x)/2
+                return "rgb(" + Math.floor (i*255) + ",0," +  Math.floor ((1-i)*255)+ ")" 
+                console.log("rgb(" + (1-i)*255 + ",0," + i*255 + ")")
+            }
+            
+        }
+        //assigns opacity to data point, creates gradient from dark to transparent where transparent is min and dark is max
+        function getOpacity (ytrait, max, y){
+            if (ytrait=="numberOfFriends" || ytrait=="numberOfEnemies"){
+                return y/max
+            }else{
+                return (1+y)/2
+            }
+            
+        }
+        
+    
+  
+        // Add X axis
+        var x = d3.scaleLinear()
+            .domain([d3.min(data, d=>d.openness), d3.max(data, d=>d.openness)])
+            .range([ 0, width ]);
+        svg.append("g")
+            .attr("id", "xAxisGroup")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+        //X-axis label
+        svg.append("text")
+            .attr("id", "xTextGroup")
+            .attr("transform", "translate(" + (width/2) + " ," + 
+                           (height + 40) + ")")
+            .style("text-anchor", "middle")
+            .text("openness");
+
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+            .domain([d3.min(data, d=>d.openness), d3.max(data, d=>d.openness)])
+            .range([ height, 0]);
+        svg.append("g")
+            .attr("id", "yAxisGroup")
+            .call(d3.axisLeft(y));    
+        //Y-axis label
+        svg.append("text")
+            .attr("id", "yTextGroup")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -40)
+            .attr("x", 0- (height / 2))
+            .style("text-anchor", "middle")
+            .text("extroversion");
+        
+    
+    // Add dots
+        var allCircles = svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", d => x(d[xtrait]))
+            .attr("cy", d => y(d[ytrait]))
+            .attr("r", 3.0)
+            .attr("fill", d => getColor("openness", 1, d[xtrait]))
+            .attr("fill-opacity", d => getOpacity("extroversion", 1, d[ytrait]))
+            .attr("stroke", d => getColor("openness", 1, d[xtrait]))
+            .attr("stroke-width", 0.5)
+            //if mouse is over data point
+            .on('mouseover', function(d, i) {
+                
+                d3.select(".info .name").text(d['name']);
+                d3.select(".info .numberOfFriends").text(d['numberOfFriends']);
+                d3.select(".info .numberOfEnemies").text(d['numberOfEnemies']);
+                d3.select(".info .extroversion").text(d['extroversion']);
+                d3.select(".info .neuroticism").text(d['neuroticism']);
+                d3.select(".info .openness").text(d['openness']);
+                d3.select(".info .conscientiousness").text(d['conscientiousness']);
+                d3.select(".info .agreeableness").text(d['agreeableness']);
+                //set to visible
+                d3.select(".info").style('visibility', 'visible');
+                //dot becomes big and black
+                d3.select(this)
+                    .transition()
+                    .duration(100)
+                    .attr('r', 8)
+                    .attr('fill', 'black')
+                    .attr("fill-opacity", 1.0);
+            })
+            //if mouse is not over data point
+            .on('mouseout', function(d, i) {
+                //set to hidden
+                d3.select(".info").style('visibility', 'hidden');
+                //return to original color and size
+                d3.select(this)
+                    .transition()
+                    .duration(100)
+                    .attr('r', 3.0)
+                    .attr('fill', d => getColor(xtrait, 1, d[xtrait]))
+                    .attr("fill-opacity", d => getOpacity(ytrait, 1, d[ytrait]))
+                    .attr("stroke", d => getColor(xtrait, 1, d[xtrait]))
+                    .attr("stroke-width", 0.5);
+            })
+            
+        
+        var form = document.querySelector("form");
+        var log = document.querySelector("#log");
+        //if user clicks submit, they have set new x an y traits
+        form.addEventListener("submit", function(event) {
+            var radioButtonsX = document.getElementsByName("x-axis");
+            console.log(radioButtonsX);
+            var radioButtonsY = document.getElementsByName("y-axis");
+            console.log(radioButtonsY);
+            
+            //find the radio button that is checked
+            //xtrait is the value we are plotitng along x axis
+            //ytrait is the value we are plotitng along x axis
+            for (var i=0; i< 7; i++) {
+                if(radioButtonsX[i].checked == true) {
+                    console.log(radioButtonsX[i].value)
+                    xtrait=radioButtonsX[i].value
+                    
+
+                }
+                
+                if(radioButtonsY[i].checked == true) {
+                    console.log(radioButtonsY[i].value)
+                    ytrait=radioButtonsY[i].value
+                   
+
+                }
+                        
+            }
+               
+                
+                //clear x and y axis and labels
+                d3.select("#xAxisGroup").remove();
+                d3.select("#yAxisGroup").remove();
+                d3.select("#xTextGroup").remove();
+                d3.select("#yTextGroup").remove();
+            
+                //redraw x and y axis and labels with new xtrait and ytrait set
+                x=d3.scaleLinear()
+                    .domain([d3.min(data, d=>d[xtrait]), d3.max(data, d=>d[xtrait])])
+                    .range([ 0, width ]);
+                
+                svg.append("g")
+                    .attr("id", "xAxisGroup")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x));
+
+                y=d3.scaleLinear()
+                    .domain([d3.min(data, d=>d[ytrait]), d3.max(data, d=>d[ytrait])])
+                    .range([ height, 0]);
+                
+                svg.append("g")
+                    .attr("id", "yAxisGroup")
+                    .call(d3.axisLeft(y));   
+            
+                svg.append("text")
+                    .attr("id", "xTextGroup")
+                    .attr("transform", "translate(" + (width/2) + " ," + 
+                           (height + 40) + ")")
+                    .style("text-anchor", "middle")
+                    .text(xtrait);
+        
+                svg.append("text")
+                    .attr("id", "yTextGroup")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", -40)
+                    .attr("x", 0- (height / 2))
+                    .style("text-anchor", "middle")
+                    .text(ytrait);
+            
+                //redraw dots with new xtrait and ytrait set
+                d3.selectAll("circle")
+                        .data(data)
+                        .attr("cx", d=> x(d[xtrait]))
+                        .attr("cy", d => y(d[ytrait]))
+                        .attr("r", 3.0)
+                        .attr("fill", d => getColor(xtrait, d3.max(data, d=>d[xtrait]), d[xtrait]))
+                        .attr("fill-opacity", d => getOpacity( ytrait, d3.max(data, d=>d[ytrait]), d[ytrait]))
+                        .attr("stroke", d => getColor(xtrait, d3.max(data, d=>d[xtrait]), d[xtrait]))
+                        .attr("stroke-width", 0.5);;
+            
+                
+            
+            event.preventDefault();
+            }, false);
+                    
+    });
+    
+
+    
+    
+    
+</script>
