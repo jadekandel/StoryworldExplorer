@@ -196,15 +196,15 @@
     
     // Add dots
         var allCircles = svg.selectAll("circle")
-            .data(data)
+            .data(data) //data.(d3entries(data))
             .enter()
             .append("circle")
             .attr("cx", d => x(d[xtrait]))
             .attr("cy", d => y(d[ytrait]))
             .attr("r", 3.0)
-            .attr("fill", d => getColor("openness", 1, d[xtrait]))
-            .attr("fill-opacity", d => getOpacity("extroversion", 1, d[ytrait]))
-            .attr("stroke", d => getColor("openness", 1, d[xtrait]))
+            .attr("fill", d => getColor(xtrait, 1, d[xtrait]))
+            .attr("fill-opacity", d => getOpacity(ytrait, 1, d[ytrait]))
+            .attr("stroke", d => getColor(xtrait, 1, d[xtrait]))
             .attr("stroke-width", 0.5)
             //if mouse is over data point
             .on('mouseover', function(d, i) {
@@ -236,12 +236,14 @@
                     .transition()
                     .duration(100)
                     .attr('r', 3.0)
-                    .attr('fill', d => getColor(xtrait, 1, d[xtrait]))
-                    .attr("fill-opacity", d => getOpacity(ytrait, 1, d[ytrait]))
-                    .attr("stroke", d => getColor(xtrait, 1, d[xtrait]))
+                    .attr('fill', d => getColor(xtrait, d3.max(data, d=>d[xtrait]), d[xtrait]))
+                    .attr("fill-opacity", d => getOpacity(ytrait, d3.max(data, d=>d[ytrait]), d[ytrait]))
+                    .attr("stroke", d => getColor(xtrait, d3.max(data, d=>d[xtrait]), d[xtrait]))
                     .attr("stroke-width", 0.5);
             })
-            
+            //on click : hide the scatterplot view, show the character view. Keep scatterplot x ad y axis there so if they want to go back they click submit. 
+        
+            //keys are ids, values are everything about a character. 
         
         var form = document.querySelector("form");
         var log = document.querySelector("#log");
